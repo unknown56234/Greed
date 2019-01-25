@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{9FB93DCE-70EB-42A0-8B0D-6601FFC3FE50}</ProjectGuid>
+    <RootNamespace>Greed</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Greed\Common\Implementation.cpp" />
+    <ClCompile Include="Greed\Graphics\CommandAllocator\CommandAllocator.cpp" />
+    <ClCompile Include="Greed\Graphics\CommandQueue\CommandQueue.cpp" />
+    <ClCompile Include="Greed\Graphics\Context\Context.cpp" />
+    <ClCompile Include="Greed\Graphics\DepthBuffer\DepthBuffer.cpp" />
+    <ClCompile Include="Greed\Graphics\DeviceBuilder\DeviceBuilder.cpp" />
+    <ClCompile Include="Greed\Graphics\SwapChain\SwapChain.cpp" />
+    <ClCompile Include="Greed\ThirdParty\imgui\imgui.cpp" />
+    <ClCompile Include="Greed\ThirdParty\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Greed\ThirdParty\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Greed\ThirdParty\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="Greed\ThirdParty\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Greed\ThirdParty\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Greed\Common\Common.h" />
+    <ClInclude Include="Greed\Common\Resource\ImageLoader\DDSLoader\DDSLoader.h" />
+    <ClInclude Include="Greed\Common\Resource\ImageLoader\ImageLoader.h" />
+    <ClInclude Include="Greed\Common\Resource\ImageLoader\ImageLoaderBase\ImageLoaderBase.h" />
+    <ClInclude Include="Greed\Common\Resource\ImageLoader\WICLoader\WICLoader.h" />
+    <ClInclude Include="Greed\Common\Resource\Resource.h" />
+    <ClInclude Include="Greed\Common\Window\Window.h" />
+    <ClInclude Include="Greed\Graphics\CommandAllocator\CommandAllocator.h" />
+    <ClInclude Include="Greed\Graphics\CommandQueue\CommandQueue.h" />
+    <ClInclude Include="Greed\Graphics\Context\Context.h" />
+    <ClInclude Include="Greed\Graphics\DebugLayer\DebugLayer.h" />
+    <ClInclude Include="Greed\Graphics\DepthBuffer\DepthBuffer.h" />
+    <ClInclude Include="Greed\Graphics\DeviceBuilder\DeviceBuilder.h" />
+    <ClInclude Include="Greed\Graphics\Graphics.h" />
+    <ClInclude Include="Greed\Graphics\Gui\Context\Context.h" />
+    <ClInclude Include="Greed\Graphics\Material\Material.h" />
+    <ClInclude Include="Greed\Graphics\Mesh\Mesh.h" />
+    <ClInclude Include="Greed\Graphics\Model\Model.h" />
+    <ClInclude Include="Greed\Graphics\Pipeline\Builder\Builder.h" />
+    <ClInclude Include="Greed\Graphics\Pipeline\Builder\GfxPipelineBuilder\GfxPipelineBuilder.h" />
+    <ClInclude Include="Greed\Graphics\Pipeline\Pipeline.h" />
+    <ClInclude Include="Greed\Graphics\Resource\ConstantBuffer\ConstantBuffer.h" />
+    <ClInclude Include="Greed\Graphics\Resource\CubeMap\CubeMap.h" />
+    <ClInclude Include="Greed\Graphics\Resource\Image\Image.h" />
+    <ClInclude Include="Greed\Graphics\Resource\IndexBuffer\IndexBuffer.h" />
+    <ClInclude Include="Greed\Graphics\Resource\Resource.h" />
+    <ClInclude Include="Greed\Graphics\Resource\UploadBuffer\UploadBuffer.h" />
+    <ClInclude Include="Greed\Graphics\Resource\VertexBuffer\VertexBuffer.h" />
+    <ClInclude Include="Greed\Graphics\Shader\GeometryShader\GeometryShader.h" />
+    <ClInclude Include="Greed\Graphics\Shader\PixelShader\PixelShader.h" />
+    <ClInclude Include="Greed\Graphics\Shader\Shader.h" />
+    <ClInclude Include="Greed\Graphics\Shader\VertexShader\VertexShader.h" />
+    <ClInclude Include="Greed\Graphics\SwapChain\SwapChain.h" />
+    <ClInclude Include="Greed\Graphics\Transform\Transform.h" />
+    <ClInclude Include="Greed\ThirdParty\DirectXTex\include\DirectXTex.h" />
+    <ClInclude Include="Greed\ThirdParty\imgui\imconfig.h" />
+    <ClInclude Include="Greed\ThirdParty\imgui\imgui.h" />
+    <ClInclude Include="Greed\ThirdParty\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="Greed\ThirdParty\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="Greed\ThirdParty\imgui\imgui_internal.h" />
+    <ClInclude Include="Greed\ThirdParty\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Greed\ThirdParty\imgui\imstb_textedit.h" />
+    <ClInclude Include="Greed\ThirdParty\imgui\imstb_truetype.h" />
+    <ClInclude Include="Greed\ThirdParty\tinygltf\json.hpp" />
+    <ClInclude Include="Greed\ThirdParty\tinygltf\stb_image.h" />
+    <ClInclude Include="Greed\ThirdParty\tinygltf\stb_image_write.h" />
+    <ClInclude Include="Greed\ThirdParty\tinygltf\tiny_gltf.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Greed\ThirdParty\DirectXTex\include\DirectXTex.inl" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\WinPixEventRuntime.1.0.181206001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.181206001\build\WinPixEventRuntime.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.181206001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.181206001\build\WinPixEventRuntime.targets'))" />
+  </Target>
+</Project>
