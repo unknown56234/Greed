@@ -16,6 +16,10 @@ namespace gr
                 {
                     return compileResult;
                 }
+                ComPtr<ID3DBlob> GetErrorBlob() const
+                {
+                    return errorBlob;
+                }
                 Shader(LPCWSTR path,LPCSTR entryPoint,LPCSTR target, const std::vector<D3D_SHADER_MACRO>& macro)
                 {
                     
@@ -24,12 +28,12 @@ namespace gr
 #else 
                     UINT compileFlag = 0;
 #endif
-                    ComPtr<ID3DBlob> errorBlob{};
                     compileResult = D3DCompileFromFile(path, macro.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, target, compileFlag, 0, blob.GetAddressOf(), errorBlob.GetAddressOf());
                 }
             private:
                 ComPtr<ID3DBlob> blob{};
                 HRESULT compileResult{};
+                ComPtr<ID3DBlob> errorBlob{};
 
             };
         }

@@ -1,5 +1,5 @@
 # Greed
 DrectX12で描画周りの研究をしているリポジトリ
 
-TODO
-リソースのDLリンク追加
+モデルやShader等のリソースは下記URLから別途ダウンロードしてください。
+https://drive.google.com/open?id=1UK6rDw1odrWApS4CyznvSh9kaH99BeyP

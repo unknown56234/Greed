@@ -10,11 +10,13 @@ namespace gr
         {
             struct SceneInfo
             {
+                DirectX::XMFLOAT4X4 worldMatrix{};
                 DirectX::XMFLOAT4X4 viewMatrix{};
                 DirectX::XMFLOAT4X4 projectionMatrix{};
                 DirectX::XMFLOAT4 viewPosition{};
                 DirectX::XMFLOAT4 lightDirection{};
                 DirectX::XMFLOAT4 lightColor{};
+                DirectX::XMFLOAT4 iblWeight{};
             };
         }
     }
@@ -56,14 +58,15 @@ namespace gr
                 DirectX::XMFLOAT3 cameraTarget{ 0.0f,0.0f,0.0f };
                 DirectX::XMFLOAT3 cameraUp{ 0.0f,1.0f,0.0f };
 
-                std::string pipelineBuildResult{};
+                std::string pipelineBuildResult = "pipeline build result";
 
                 gr::DataStruct::SceneInfo::SceneInfo sceneInfo{};
+                DirectX::XMStoreFloat4x4(&sceneInfo.worldMatrix, DirectX::XMMatrixIdentity());
                 sceneInfo.lightColor.x = 1.0f;
                 sceneInfo.lightColor.y = 1.0f;
                 sceneInfo.lightColor.z = 1.0f;
                 sceneInfo.lightColor.w = 1.0f;
-
+                sceneInfo.iblWeight.x = 1.0f;
                 float lightRotation{};
                 float lightPitch{};
 
@@ -72,7 +75,7 @@ namespace gr
                 float viewDistance = 3.0f;
 
                 bool useVSync = true;
-                bool useIbl = true;
+                float rotationSpeed = 1.0f;
 
                 auto& directQueue = GfxContext::GetInstance()->GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 
@@ -83,15 +86,16 @@ namespace gr
 
                     //各種GUI
                     {
-                        if (ImGui::Begin("debug"))
+                        if (ImGui::Begin("scene"))
                         {
+
                             ImGui::Checkbox("use vsync", &useVSync);
-                            ImGui::Checkbox("use IBL", &useIbl);
+                            ImGui::SliderFloat("rotation speed", &rotationSpeed, 0.0f, 2.0f);
 
                             if (ImGui::Button("Reload Shader"))
                             {
                                 directQueue->WaitIdle();
-                                auto res = CreatePipeline(useIbl, false);
+                                auto res = CreatePipeline(false);
                                 if (res)
                                 {
                                     pipelineBuildResult = "pipeline build success";
@@ -113,12 +117,7 @@ namespace gr
 
                         if (ImGui::Begin("background"))
                         {
-                            float c[4]{ backGroundColor.x,backGroundColor.y ,backGroundColor.z ,backGroundColor.w };
-                            ImGui::ColorPicker4("color", c);
-                            backGroundColor.x = c[0];
-                            backGroundColor.y = c[1];
-                            backGroundColor.z = c[2];
-                            backGroundColor.w = c[3];
+                            ImGui::ColorPicker4("color", reinterpret_cast<float*>(&backGroundColor));
                         }
                         ImGui::End();
 
@@ -136,12 +135,8 @@ namespace gr
                             sceneInfo.lightDirection.y = dir.y;
                             sceneInfo.lightDirection.z = dir.z;
 
-                            float c[4]{ sceneInfo.lightColor.x,sceneInfo.lightColor.y ,sceneInfo.lightColor.z ,sceneInfo.lightColor.w };
-                            ImGui::ColorPicker4("color", c);
-                            sceneInfo.lightColor.x = c[0];
-                            sceneInfo.lightColor.y = c[1];
-                            sceneInfo.lightColor.z = c[2];
-                            sceneInfo.lightColor.w = c[3];
+                            ImGui::ColorPicker4("color", reinterpret_cast<float*>(&sceneInfo.lightColor));
+                            ImGui::SliderFloat("ibl weight", &sceneInfo.iblWeight.x, 0.0f, 1.0f);
                         }
                         ImGui::End();
 
@@ -169,22 +164,30 @@ namespace gr
 
                     //シェーダーに送るシーン情報更新
                     {
-                        auto ptr = viewProjection->Map();
+                        auto ptr = sceneInfomation->Map();
                         {
+                            //world
+                            auto w = DirectX::XMLoadFloat4x4(&sceneInfo.worldMatrix);
+                            w = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationY(rotationSpeed*DirectX::XM_2PI*ImGui::GetIO().DeltaTime*0.05f), w);
+                            DirectX::XMStoreFloat4x4(&sceneInfo.worldMatrix, w);
+
+                            //view
                             auto position = DirectX::XMLoadFloat3(&cameraPosition);
                             auto target = DirectX::XMLoadFloat3(&cameraTarget);
                             auto up = DirectX::XMLoadFloat3(&cameraUp);
                             auto viewMat = DirectX::XMMatrixLookAtLH(position, target, up);
-                            auto projectionMat = DirectX::XMMatrixPerspectiveFovLH(60.0f / 180.0f*DirectX::XM_PI, static_cast<float>(swapchain->GetWidth()) / static_cast<float>(swapchain->GetHeight()), 0.1f, 512.0f);
 
                             DirectX::XMStoreFloat4x4(&sceneInfo.viewMatrix, viewMat);
-                            DirectX::XMStoreFloat4x4(&sceneInfo.projectionMatrix, projectionMat);
                             sceneInfo.viewPosition.x = cameraPosition.x;
                             sceneInfo.viewPosition.y = cameraPosition.y;
                             sceneInfo.viewPosition.z = cameraPosition.z;
+
+                            //projection
+                            auto projectionMat = DirectX::XMMatrixPerspectiveFovLH(60.0f / 180.0f*DirectX::XM_PI, static_cast<float>(swapchain->GetWidth()) / static_cast<float>(swapchain->GetHeight()), 0.1f, 512.0f);
+                            DirectX::XMStoreFloat4x4(&sceneInfo.projectionMatrix, projectionMat);
                         }
                         memcpy(ptr, &sceneInfo, sizeof(sceneInfo));
-                        viewProjection->Unmap();
+                        sceneInfomation->Unmap();
                     }
                     modelReference->Update();
 
@@ -195,39 +198,23 @@ namespace gr
                     D3D12_CPU_DESCRIPTOR_HANDLE	dsvHandle = depthBuffer->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
                     swapchain->BeginRender(directCommandList, backGroundColor.x, backGroundColor.y, backGroundColor.z, backGroundColor.w, &dsvHandle);
                     D3D12_RECT rc{};
-                    rc.left = 0;
-                    rc.top = 0;
-                    rc.right = swapchain->GetWidth();
-                    rc.bottom = swapchain->GetHeight();
+                    rc = CD3DX12_RECT(0, 0, static_cast<LONG>(swapchain->GetWidth()), static_cast<LONG>(swapchain->GetHeight()));
                     directCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 1, &rc);
 
                     {
                         PIXBeginEvent(directCommandList.Get(), 0, "draw model");
                         directCommandList->SetPipelineState(gfxPipeline->GetPipelineState().Get());
                         directCommandList->SetGraphicsRootSignature(gfxPipeline->GetRootSignature().Get());
-                        viewport.TopLeftX = 0.0f;
-                        viewport.TopLeftY = 0.0f;
-                        viewport.Width = static_cast<float>(swapchain->GetWidth());
-                        viewport.Height = static_cast<float>(swapchain->GetHeight());
-                        viewport.MinDepth = 0.0f;
-                        viewport.MaxDepth = 1.0f;
-
-                        scissorRect.left = 0;
-                        scissorRect.top = 0;
-                        scissorRect.right = static_cast<LONG>(swapchain->GetWidth());
-                        scissorRect.bottom = static_cast<LONG>(swapchain->GetHeight());
+                        viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(swapchain->GetWidth()), static_cast<float>(swapchain->GetHeight()), 0.0f, 1.0f);
+                        scissorRect = CD3DX12_RECT(0, 0, static_cast<LONG>(swapchain->GetWidth()), static_cast<LONG>(swapchain->GetHeight()));
 
                         directCommandList->RSSetViewports(1, &viewport);
                         directCommandList->RSSetScissorRects(1, &scissorRect);
 
                         directCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-                        directCommandList->SetGraphicsRootConstantBufferView(0, viewProjection->GetResource()->GetGPUVirtualAddress());
+                        directCommandList->SetGraphicsRootConstantBufferView(0, sceneInfomation->GetResource()->GetGPUVirtualAddress());
                         directCommandList->SetGraphicsRootConstantBufferView(1, modelReference->GetNodeBuffer()->GetResource()->GetGPUVirtualAddress());
-
-                        //test
-                        //directCommandList->SetGraphicsRootShaderResourceView(4, );
-
 
                         int nodeCount = model->GetNodes().size();
                         for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++)
@@ -349,9 +336,9 @@ namespace gr
         private:
             void CreateResources()
             {
-                CreatePipeline(true);
+                CreatePipeline();
 
-                viewProjection = std::make_shared<UploadBuffer>(sizeof(DirectX::XMFLOAT4X4) * 2);
+                sceneInfomation = std::make_shared<UploadBuffer>(sizeof(gr::DataStruct::SceneInfo::SceneInfo));
 
                 //モデルのロード
                 {
@@ -359,11 +346,8 @@ namespace gr
                     tinygltf::TinyGLTF loader{};
                     std::string err{};
                     std::string warn{};
-                    //loader.LoadASCIIFromFile(&modelData, &err, &warn, "C:\\Users\\2160065\\Documents\\workspace\\glTF-Sample-Models\\2.0\\MetalRoughSpheres\\glTF\\MetalRoughSpheres.gltf");
-                    loader.LoadASCIIFromFile(&modelData, &err, &warn, "C:\\Users\\2160065\\Documents\\workspace\\glTF-Sample-Models\\2.0\\DamagedHelmet\\glTF\\DamagedHelmet.gltf");
-                    //loader.LoadASCIIFromFile(&modelData, &err, &warn, "C:\\Users\\2160065\\Documents\\workspace\\glTF-Sample-Models\\2.0\\Buggy\\glTF\\Buggy.gltf");
-                    //loader.LoadASCIIFromFile(&modelData, &err, &warn, "C:\\Users\\2160065\\Documents\\workspace\\glTF-Sample-Models\\2.0\\FlightHelmet\\glTF\\FlightHelmet.gltf");
-                    //loader.LoadASCIIFromFile(&modelData, &err, &warn, "C:\\Users\\2160065\\Documents\\workspace\\glTF-Sample-Models\\2.0\\BoomBox\\glTF\\BoomBox.gltf");
+                    //TODO 外から読み込みモデルを変更できるように
+                    loader.LoadASCIIFromFile(&modelData, &err, &warn, "Resource\\Model\\DamagedHelmet\\glTF\\DamagedHelmet.gltf");
 
                     model = std::make_shared<gr::Graphics::Model::Model>(
                         directCommandAllocator->GetCommandAllocator(),
@@ -375,45 +359,12 @@ namespace gr
                 }
 
                 {
+                    //TODO テクスチャ変更できるように
                     auto loader = std::make_unique<gr::Common::Resource::ImageLoader::ImageLoader>();
-                    auto createImageResourceFromScratchImage = [&](const DirectX::ScratchImage& scratchImage)
-                    {
-                        ComPtr<ID3D12Resource> image{};
-                        DirectX::CreateTextureEx(GfxContext::GetInstance()->GetDevice().Get(), scratchImage.GetMetadata(), D3D12_RESOURCE_FLAG_NONE, false, image.GetAddressOf());
-                        std::vector<D3D12_SUBRESOURCE_DATA> subresources{};
-                        DirectX::PrepareUpload(GfxContext::GetInstance()->GetDevice().Get(), scratchImage.GetImages(), scratchImage.GetImageCount(), scratchImage.GetMetadata(), subresources);
-                        auto uploadBufferSize = GetRequiredIntermediateSize(image.Get(), 0, subresources.size());
-
-                        auto stagingBuffer = std::make_unique<UploadBuffer>(uploadBufferSize);
-
-                        UpdateSubresources(directCommandList.Get(),
-                            image.Get(), stagingBuffer->GetResource().Get(),
-                            0, 0, static_cast<unsigned int>(subresources.size()),
-                            subresources.data());
-
-                        D3D12_RESOURCE_BARRIER	resourceBarrier = {};
-                        resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-                        resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                        resourceBarrier.Transition.pResource = image.Get();
-                        resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-                        resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-                        resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-                        directCommandList->ResourceBarrier(1, &resourceBarrier);
-
-                        directCommandList->Close();
-                        std::vector<ID3D12CommandList*> commands{ directCommandList.Get() };
-                        auto& commandQueue = GfxContext::GetInstance()->GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-                        commandQueue->GetCommandQueue()->ExecuteCommandLists(static_cast<UINT>(commands.size()), commands.data());
-                        commandQueue->WaitIdle();//stagingBufferの寿命が切れるのでここで待つ
-
-                        directCommandAllocator->Reset();
-                        directCommandList->Reset(directCommandAllocator->GetCommandAllocator().Get(), NULL);
-                        return image;
-                    };
 
                     DirectX::ScratchImage scratchImage{};
                     scratchImage = loader->Load("Resource\\Texture\\cubemap\\yokohama_dds\\yokohamaDiffuseHDR.dds");
-                    cubeMapDiffuse = std::make_unique<Image>(directCommandAllocator->GetCommandAllocator(),directCommandList,scratchImage);
+                    cubeMapDiffuse = std::make_unique<Image>(directCommandAllocator->GetCommandAllocator(), directCommandList, scratchImage);
 
                     scratchImage = loader->Load("Resource\\Texture\\cubemap\\yokohama_dds\\yokohamaSpecularHDR.dds");
                     cubeMapSpecular = std::make_unique<Image>(directCommandAllocator->GetCommandAllocator(), directCommandList, scratchImage);
@@ -427,7 +378,7 @@ namespace gr
                     descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
                     descriptorHeapDesc.NodeMask = 0;
                     GfxContext::GetInstance()->GetDevice()->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(cubeMapDescriptorHeap.GetAddressOf()));
-                    
+
                     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
                     srvDesc.Format = cubeMapDiffuse->GetFormat();
                     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
@@ -450,9 +401,10 @@ namespace gr
                     srvDesc.Format = brdfImage->GetFormat();
                     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
                     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-                    srvDesc.TextureCube.MipLevels = brdfImage->GetResource()->GetDesc().MipLevels;
-                    srvDesc.TextureCube.MostDetailedMip = 0;
-                    srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+                    srvDesc.Texture2D.MipLevels = brdfImage->GetResource()->GetDesc().MipLevels;
+                    srvDesc.Texture2D.MostDetailedMip = 0;
+                    srvDesc.Texture2D.PlaneSlice = 0;
+                    srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
                     handle.ptr += GfxContext::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
                     GfxContext::GetInstance()->GetDevice()->CreateShaderResourceView(brdfImage->GetResource().Get(), &srvDesc, handle);
                     for (auto&& material : model->GetMaterials())
@@ -465,16 +417,10 @@ namespace gr
                 }
             }
             //forceがfalseのときは作成失敗時に現状維持する
-            bool CreatePipeline(bool useIbl, bool force = true)
+            bool CreatePipeline(bool force = true)
             {
-                std::vector<D3D_SHADER_MACRO> macros = {};
-                if (useIbl)
-                {
-                    macros.push_back({ "USE_IBL", "" });
-                }
-                macros.push_back({ NULL, NULL });
-                auto vertexShader = std::make_unique<VertexShader>(L"Resource\\Shader\\Test\\vertex.hlsl");
-                auto pixelShader = std::make_unique<PixelShader>(L"Resource\\Shader\\Test\\pixel.hlsl", macros);
+                auto vertexShader = std::make_unique<VertexShader>(L"Resource\\Shader\\PBR\\vertex.hlsl");
+                auto pixelShader = std::make_unique<PixelShader>(L"Resource\\Shader\\PBR\\pixel.hlsl");
 
                 if (FAILED(vertexShader->GetCompileResult()) || FAILED(pixelShader->GetCompileResult()))
                 {
@@ -527,7 +473,7 @@ namespace gr
 
             std::shared_ptr<Pipeline> gfxPipeline{};
 
-            std::shared_ptr<UploadBuffer> viewProjection{};
+            std::shared_ptr<UploadBuffer> sceneInfomation{};
 
             std::shared_ptr<Model> model{};
             std::shared_ptr<ModelReference> modelReference{};
